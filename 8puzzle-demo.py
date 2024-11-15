@@ -12,6 +12,7 @@
                                   Và g(x) là số nút đã duyệt (Nếu như mới khởi tại -> g(x) = 0)
 """
 
+
 class Node:
     def __init__(self, data, level, fval):
         """Initialize the node with data, level of the node, and calculated fvalue."""
