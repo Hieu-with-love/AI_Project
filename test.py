@@ -16,28 +16,25 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
 puzzle = EightPuzzle(tuple(state))
 solution = None
+solution_states = []  # List to store the solution states
 
 # UI components
 b = [None] * 9
 
 # Load and process image
-# Đọc file ảnh bằng thư viện OpenCV
 image = cv2.imread('22110139.jpeg')
-# Chuyển từ không gian màu BGR của thư viện OpenCV sang RGB của thư viện pillow và tkinter
 parse_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-# Chuyển đổi từ dạng NumPy array (Open CV) sang đối tượng Image (thuận tiện cho việc xử lý ảnh)
 pil_image = Image.fromarray(parse_image)
 
-# Kích thước của một mảnh bằng 1/3 kích thước của ảnh.
+# Size of each piece
 piece_width = pil_image.width // 3
 piece_height = pil_image.height // 3
 
-# Mảng dùng để lưu trữ các mảnh cắt
+# Array to store the puzzle pieces
 pieces = []
-# Lưu trữ trạng thái (các số từ 0 -> 8) và các mảh tương ứng của puzzle
 state_pieces = {}
 
-# Tạo một mảnh trắng (đại diện cho '_')
+# White piece (empty space)
 white = Image.new('RGB', (piece_width, piece_height), (255, 255, 255))
 piece_number = 0
 
@@ -52,11 +49,8 @@ for row in range(3):
         if col == 2 and row == 2:
             break  # Skip the last piece (white)
 
-        # Cắt ảnh theo kích thước đã tính toán
         piece = pil_image.crop((left, upper, right, lower))
-        # Thêm vào list các mảnh
         pieces.append(piece)
-        # Trạng thái của ảnh
         state_pieces[piece_number] = piece
         piece_number += 1
 
@@ -90,12 +84,14 @@ def problem_solve():
 
 
 def solve_steps():
-    global state, solution, puzzle, state_pieces, pieces
+    global state, solution, puzzle, state_pieces, pieces, solution_states
     solution = problem_solve()
+    solution_states = []  # Reset solution states
     print("Solution steps:", solution)
 
     for move in solution:
         state = list(puzzle.result(state, move))
+        solution_states.append(list(state))  # Save the state after each move
         puzzle = EightPuzzle(tuple(state))
         state_pieces = {state[i]: pieces[i] for i in range(9)}
         create_GUI()
@@ -144,13 +140,30 @@ def create_GUI():
         b[i].image = tk_piece
 
 
-# Create static buttons (Scramble and Solve)
+# Create static buttons (Scramble, Solve, Show Solution)
 def create_function_buttons():
     scramble_btn = ttk.Button(root, text='Scramble', width=8, command=scramble)
     scramble_btn.grid(row=3, column=0, ipady=10, sticky=tk.EW)
 
     run_btn = ttk.Button(root, text='Run', width=8, command=solve_steps)
     run_btn.grid(row=3, column=2, ipady=10, sticky=tk.EW)
+
+    show_solution_btn = ttk.Button(root, text='Show Solution', width=8, command=show_solution)
+    show_solution_btn.grid(row=4, column=1, ipady=10, sticky=tk.EW)
+
+
+# Function to display the solution
+def show_solution():
+    global solution_states
+    if solution_states:
+        for state in solution_states:
+            print("State:", state)
+            # Here, you could also display each state visually if desired
+            # For now, we are just printing the states
+            time.sleep(1)
+    else:
+        print("No solution available")
+
 
 # Initialize the puzzle
 def init():
